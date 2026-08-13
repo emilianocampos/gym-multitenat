@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { Lock, Mail, ArrowRight, RefreshCw, AlertCircle, ShieldCheck, CheckCircle2 } from 'lucide-react';
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectPath = searchParams.get('redirect') || '';
@@ -150,3 +150,16 @@ export default function LoginPage() {
   );
 }
 
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-[#0B0B0E] text-white flex items-center justify-center">
+          <RefreshCw className="h-8 w-8 text-[var(--gym-primary)] animate-spin" />
+        </div>
+      }
+    >
+      <LoginContent />
+    </Suspense>
+  );
+}
