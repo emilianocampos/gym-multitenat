@@ -1,0 +1,65 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+:root {
+  --gym-bg: #0B0B0E;
+  --gym-surface: #141418;
+  --gym-card: #18181C;
+  --gym-border: #27272F;
+  --gym-primary: #CCFF00;
+  --gym-primary-hover: #b8e600;
+  --gym-secondary: #1F1F24;
+  --gym-text: #FFFFFF;
+  --gym-muted: #9494A0;
+  --gym-accent: #88FF00;
+}
+
+body {
+  background-color: var(--gym-bg);
+  color: var(--gym-text);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Glassmorphism utilities */
+.glass-panel {
+  background: rgba(20, 20, 24, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-card {
+  background: rgba(24, 24, 28, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.glow-neon {
+  box-shadow: 0 0 25px rgba(204, 255, 0, 0.35);
+}
+
+.glow-neon-subtle {
+  box-shadow: 0 0 15px rgba(204, 255, 0, 0.15);
+}
+
+/* Dynamic custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0B0B0E;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #27272F;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gym-primary);
+}
