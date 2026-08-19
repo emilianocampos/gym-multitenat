@@ -83,10 +83,10 @@ export default function ImportExcelRoutinePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0B0B0E] text-white flex">
+    <div className="min-h-screen bg-[#0B0B0E] text-white flex flex-col md:flex-row">
       <AdminSidebar />
 
-      <main className="flex-1 md:ml-64 p-6 lg:p-10 space-y-8">
+      <main className="w-full min-w-0 flex-1 md:ml-64 p-4 sm:p-6 lg:p-10 space-y-6 sm:space-y-8">
         {/* Header */}
         <div className="border-b border-zinc-800 pb-6">
           <div className="flex items-center space-x-2 text-[var(--gym-primary)]">
@@ -104,9 +104,9 @@ export default function ImportExcelRoutinePage() {
         {/* STEP 1: UPLOAD ZONE */}
         {step === 'upload' && (
           <div className="mx-auto max-w-2xl space-y-6">
-            <div className="rounded-3xl bg-[#141418] p-8 border border-white/5 shadow-2xl text-center space-y-6">
-              <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-3xl bg-[var(--gym-primary)]/10 text-[var(--gym-primary)] border border-[var(--gym-primary)]/20 shadow-neon-subtle">
-                <FileSpreadsheet className="h-10 w-10 text-[var(--gym-primary)]" />
+            <div className="rounded-3xl bg-[#141418] p-5 sm:p-8 border border-white/5 shadow-2xl text-center space-y-6">
+              <div className="mx-auto flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-3xl bg-[var(--gym-primary)]/10 text-[var(--gym-primary)] border border-[var(--gym-primary)]/20 shadow-neon-subtle">
+                <FileSpreadsheet className="h-8 w-8 sm:h-10 sm:w-10 text-[var(--gym-primary)]" />
               </div>
 
               <div>
@@ -135,7 +135,7 @@ export default function ImportExcelRoutinePage() {
               <button
                 onClick={processWithAI}
                 disabled={!file || isProcessing}
-                className="w-full flex items-center justify-center space-x-2 rounded-2xl bg-[var(--gym-primary)] py-4 text-sm font-black uppercase text-black tracking-wider shadow-neon hover:bg-[var(--gym-primary-hover)] disabled:opacity-40 transition-all"
+                className="w-full flex items-center justify-center space-x-2 rounded-2xl bg-[var(--gym-primary)] py-3.5 sm:py-4 text-xs sm:text-sm font-black uppercase text-black tracking-wider shadow-neon hover:bg-[var(--gym-primary-hover)] disabled:opacity-40 transition-all"
               >
                 {isProcessing ? (
                   <>
@@ -156,7 +156,7 @@ export default function ImportExcelRoutinePage() {
         {/* STEP 2: HUMAN PREVIEW & EXERCISE MATCHING TABLE */}
         {step === 'preview' && (
           <div className="space-y-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
                 <span className="text-xs font-extrabold uppercase text-[var(--gym-primary)]">Paso 2 de 3</span>
                 <h3 className="text-xl font-black text-white">Vista Previa de Validación Humana</h3>
@@ -165,7 +165,7 @@ export default function ImportExcelRoutinePage() {
               <button
                 onClick={confirmImport}
                 disabled={isProcessing}
-                className="flex items-center space-x-2 rounded-xl bg-[var(--gym-primary)] px-6 py-3 text-xs font-black uppercase text-black tracking-wider shadow-neon hover:bg-[var(--gym-primary-hover)] transition-all"
+                className="flex items-center justify-center space-x-2 rounded-xl bg-[var(--gym-primary)] px-4 sm:px-6 py-2.5 sm:py-3 text-xs font-black uppercase text-black tracking-wider shadow-neon hover:bg-[var(--gym-primary-hover)] transition-all"
               >
                 {isProcessing ? (
                   <RefreshCw className="h-4 w-4 animate-spin" />
@@ -180,7 +180,8 @@ export default function ImportExcelRoutinePage() {
 
             {/* Table */}
             <div className="overflow-hidden rounded-2xl bg-[#141418] border border-white/5 shadow-card">
-              <table className="w-full text-left text-xs">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs min-w-[700px]">
                 <thead className="bg-[#18181C] text-zinc-400 font-extrabold uppercase tracking-wider border-b border-zinc-800">
                   <tr>
                     <th className="p-4">Alumno</th>
@@ -225,6 +226,7 @@ export default function ImportExcelRoutinePage() {
                   ))}
                 </tbody>
               </table>
+              </div>
             </div>
           </div>
         )}

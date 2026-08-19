@@ -211,7 +211,8 @@ CREATE TABLE IF NOT EXISTS public.disciplines (
   max_capacity INT NOT NULL DEFAULT 20,
   is_active BOOLEAN NOT NULL DEFAULT true,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  CONSTRAINT unq_gym_discipline_name UNIQUE (gym_id, name)
 );
 
 CREATE INDEX IF NOT EXISTS idx_disciplines_gym_id ON public.disciplines(gym_id);
@@ -229,7 +230,8 @@ CREATE TABLE IF NOT EXISTS public.memberships (
   status membership_status NOT NULL DEFAULT 'ACTIVE',
   late_fee_amount NUMERIC(10, 2) NOT NULL DEFAULT 0.00,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  CONSTRAINT unq_student_discipline UNIQUE (student_id, discipline_id)
 );
 
 CREATE INDEX IF NOT EXISTS idx_memberships_gym_id ON public.memberships(gym_id);
@@ -311,16 +313,18 @@ CREATE TABLE IF NOT EXISTS public.reservations (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   gym_id UUID NOT NULL REFERENCES public.gyms(id) ON DELETE CASCADE,
   student_id UUID NOT NULL REFERENCES public.students(id) ON DELETE CASCADE,
-  class_schedule_id UUID NOT NULL REFERENCES public.class_schedules(id) ON DELETE CASCADE,
-  reservation_date DATE NOT NULL,
+  class_schedule_id UUID REFERENCES public.class_schedules(id) ON DELETE SET NULL,
+  discipline_id UUID REFERENCES public.disciplines(id) ON DELETE CASCADE,
+  class_time TEXT NOT NULL DEFAULT '08:00',
+  reservation_date DATE NOT NULL DEFAULT CURRENT_DATE,
   status reservation_status NOT NULL DEFAULT 'CONFIRMED',
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  CONSTRAINT unq_student_schedule_date UNIQUE (student_id, class_schedule_id, reservation_date)
+  CONSTRAINT unq_student_discipline_time_date UNIQUE (student_id, discipline_id, class_time, reservation_date)
 );
 
 CREATE INDEX IF NOT EXISTS idx_reservations_gym_date ON public.reservations(gym_id, reservation_date);
-CREATE INDEX IF NOT EXISTS idx_reservations_schedule_date ON public.reservations(class_schedule_id, reservation_date);
+CREATE INDEX IF NOT EXISTS idx_reservations_discipline_date ON public.reservations(discipline_id, reservation_date);
 ALTER TABLE public.reservations ENABLE ROW LEVEL SECURITY;
 
 -- 5.4 ASISTENCIA REAL EN GIMNASIO

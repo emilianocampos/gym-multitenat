@@ -116,6 +116,10 @@ export interface Discipline {
   description?: string | null;
   image_url?: string | null;
   price: number;
+  price_2x?: number | null;
+  price_3x?: number | null;
+  price_6x?: number | null;
+  price_single?: number | null;
   duration_minutes: number;
   max_capacity: number;
   is_active: boolean;

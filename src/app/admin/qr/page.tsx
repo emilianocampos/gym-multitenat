@@ -46,10 +46,10 @@ export default function AdminQRPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0B0B0E] text-white flex">
+    <div className="min-h-screen bg-[#0B0B0E] text-white flex flex-col md:flex-row">
       <AdminSidebar />
 
-      <main className="flex-1 md:ml-64 p-6 lg:p-10 space-y-8">
+      <main className="w-full min-w-0 flex-1 md:ml-64 p-4 sm:p-6 lg:p-10 space-y-6 sm:space-y-8">
         {/* Header */}
         <div className="border-b border-zinc-800 pb-6">
           <div className="flex items-center space-x-2 text-[var(--gym-primary)]">

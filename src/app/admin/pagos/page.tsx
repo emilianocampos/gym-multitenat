@@ -13,10 +13,10 @@ export default function AdminPaymentsPage() {
   const [payments, setPayments] = useState<Payment[]>([]);
 
   return (
-    <div className="min-h-screen bg-[#0B0B0E] text-white flex">
+    <div className="min-h-screen bg-[#0B0B0E] text-white flex flex-col md:flex-row">
       <AdminSidebar />
 
-      <main className="flex-1 md:ml-64 p-6 lg:p-10 space-y-8">
+      <main className="w-full min-w-0 flex-1 md:ml-64 p-4 sm:p-6 lg:p-10 space-y-6 sm:space-y-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-zinc-800 pb-6">
           <div>
@@ -29,7 +29,7 @@ export default function AdminPaymentsPage() {
 
           <button
             onClick={() => setShowModal(true)}
-            className="flex items-center justify-center space-x-2 rounded-xl bg-[var(--gym-primary)] px-6 py-3 text-xs font-black uppercase text-black tracking-wider shadow-neon hover:bg-[var(--gym-primary-hover)] transition-all"
+            className="flex items-center justify-center space-x-2 rounded-xl bg-[var(--gym-primary)] px-4 sm:px-6 py-2.5 sm:py-3 text-xs font-black uppercase text-black tracking-wider shadow-neon hover:bg-[var(--gym-primary-hover)] transition-all"
           >
             <PlusCircle className="h-4 w-4" />
             <span>Registrar Pago Manual</span>
@@ -47,33 +47,35 @@ export default function AdminPaymentsPage() {
               </p>
             </div>
           ) : (
-            <table className="w-full text-left text-xs">
-              <thead className="bg-[#18181C] text-zinc-400 font-extrabold uppercase tracking-wider border-b border-zinc-800">
-                <tr>
-                  <th className="p-4">ID Transacción</th>
-                  <th className="p-4">Monto</th>
-                  <th className="p-4">Método</th>
-                  <th className="p-4">Estado</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-zinc-800 text-zinc-300 font-semibold">
-                {payments.map((p) => (
-                  <tr key={p.id}>
-                    <td className="p-4">{p.id}</td>
-                    <td className="p-4">${p.amount}</td>
-                    <td className="p-4">{p.payment_method}</td>
-                    <td className="p-4">{p.status}</td>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs min-w-[600px]">
+                <thead className="bg-[#18181C] text-zinc-400 font-extrabold uppercase tracking-wider border-b border-zinc-800">
+                  <tr>
+                    <th className="p-4">ID Transacción</th>
+                    <th className="p-4">Monto</th>
+                    <th className="p-4">Método</th>
+                    <th className="p-4">Estado</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-zinc-800 text-zinc-300 font-semibold">
+                  {payments.map((p) => (
+                    <tr key={p.id}>
+                      <td className="p-4">{p.id}</td>
+                      <td className="p-4">${p.amount}</td>
+                      <td className="p-4">{p.payment_method}</td>
+                      <td className="p-4">{p.status}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
 
         {/* MANUAL PAYMENT MODAL */}
         {showModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-            <div className="w-full max-w-md rounded-3xl bg-[#141418] p-6 border border-white/10 shadow-2xl space-y-4">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto">
+            <div className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-2xl sm:rounded-3xl bg-[#141418] p-4 sm:p-6 border border-white/10 shadow-2xl space-y-4 my-auto">
               <h3 className="text-lg font-black text-white">Registrar Pago en Efectivo</h3>
 
               <div className="space-y-3">

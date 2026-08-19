@@ -1,22 +1,89 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
+import { createClient } from '@/lib/supabase/client';
 import { StudentBottomNav } from '@/components/layout/StudentBottomNav';
-import { User, CreditCard, ShieldCheck, Dumbbell, ArrowLeft, LogOut, Award } from 'lucide-react';
+import { User, CreditCard, ShieldCheck, Dumbbell, ArrowLeft, LogOut, Award, Loader2 } from 'lucide-react';
 
 export default function StudentProfilePage() {
-  const profile = {
-    name: 'Lucas Silva',
-    dni: '38.452.190',
-    email: 'lucas@gmail.com',
-    phone: '+54 11 5432-1098',
+  const [profile, setProfile] = useState({
+    name: 'Alumno',
+    dni: '-',
+    email: '-',
+    phone: '-',
     membershipStatus: 'ACTIVE',
-    nextExpiration: '01/09/2026',
-    discipline: 'CrossFit WOD',
-    trainer: 'Carlos Gómez',
-  };
+    trainer: 'Profesor de Sala',
+  });
+  const [assignedDisciplines, setAssignedDisciplines] = useState<
+    Array<{ id: string; name: string; price: number; expiration: string; status: string }>
+  >([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+
+        let studentRecord: any = null;
+
+        if (user?.email) {
+          const { data: std } = await supabase
+            .from('students')
+            .select('*')
+            .eq('email', user.email)
+            .maybeSingle();
+          if (std) studentRecord = std;
+        }
+
+        if (!studentRecord) {
+          const { data: latest } = await supabase
+            .from('students')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(1);
+          if (latest && latest.length > 0) studentRecord = latest[0];
+        }
+
+        if (studentRecord) {
+          const { data: mems } = await supabase
+            .from('memberships')
+            .select('*, discipline:disciplines(id, name, price)')
+            .eq('student_id', studentRecord.id)
+            .order('created_at', { ascending: false });
+
+          const mappedDisciplines = (mems || []).map((mem: any) => {
+            const rawDisc = Array.isArray(mem.discipline) ? mem.discipline[0] : mem.discipline;
+            return {
+              id: mem.id,
+              name: rawDisc?.name || 'Disciplina',
+              price: Number(mem.price) || 0,
+              expiration: mem.expiration_date || 'Al día',
+              status: mem.status || 'ACTIVE',
+            };
+          });
+
+          setAssignedDisciplines(mappedDisciplines);
+
+          setProfile({
+            name: `${studentRecord.first_name} ${studentRecord.last_name}`,
+            dni: studentRecord.dni || '-',
+            email: studentRecord.email || '-',
+            phone: studentRecord.phone || '-',
+            membershipStatus: studentRecord.status || 'ACTIVE',
+            trainer: 'Coach Oficial',
+          });
+        }
+      } catch (e) {
+        console.error('Error loading student profile:', e);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadData();
+  }, []);
 
   return (
     <div className="min-h-screen bg-[var(--gym-bg)] pb-28 text-white">
@@ -34,13 +101,8 @@ export default function StudentProfilePage() {
       <main className="mx-auto max-w-md px-4 space-y-6 pt-2">
         {/* Profile Card */}
         <div className="rounded-3xl bg-[#141418] p-6 border border-white/5 shadow-2xl text-center space-y-4">
-          <div className="relative mx-auto h-20 w-20 overflow-hidden rounded-full border-2 border-[var(--gym-primary)] shadow-neon">
-            <Image
-              src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200"
-              alt="Avatar"
-              fill
-              className="object-cover"
-            />
+          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border-2 border-[var(--gym-primary)] bg-zinc-800 text-2xl font-black text-[var(--gym-primary)] shadow-neon">
+            {profile.name.charAt(0)}
           </div>
 
           <div>
@@ -48,31 +110,73 @@ export default function StudentProfilePage() {
             <p className="text-xs text-zinc-400">DNI: {profile.dni} | {profile.email}</p>
           </div>
 
-          <div className="inline-flex items-center space-x-1.5 rounded-full bg-emerald-500/10 px-4 py-1 text-xs font-extrabold text-emerald-400 border border-emerald-500/20">
+          <div
+            className={`inline-flex items-center space-x-1.5 rounded-full px-4 py-1 text-xs font-extrabold border ${
+              profile.membershipStatus === 'ACTIVE'
+                ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                : profile.membershipStatus === 'SUSPENDED'
+                ? 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+                : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+            }`}
+          >
             <ShieldCheck className="h-4 w-4" />
-            <span>Membresía Al Día</span>
+            <span>
+              Membresía{' '}
+              {profile.membershipStatus === 'ACTIVE'
+                ? 'Al Día (Activo)'
+                : profile.membershipStatus === 'SUSPENDED'
+                ? 'Suspendida'
+                : 'Inactiva / Pendiente'}
+            </span>
           </div>
         </div>
 
-        {/* Membership Details */}
+        {/* Disciplinas Asignadas Details */}
         <div className="rounded-3xl bg-[#141418] p-5 border border-white/5 space-y-3">
-          <h3 className="text-xs font-extrabold uppercase tracking-widest text-[var(--gym-primary)]">
-            Detalles de Membresía
-          </h3>
+          <div className="flex items-center justify-between">
+            <h3 className="text-xs font-extrabold uppercase tracking-widest text-[var(--gym-primary)] flex items-center gap-1.5">
+              <Dumbbell className="h-4 w-4" />
+              <span>Disciplinas Asignadas ({assignedDisciplines.length})</span>
+            </h3>
+            {assignedDisciplines.length > 0 && (
+              <span className="text-[10px] font-bold text-zinc-400">
+                Total: ${assignedDisciplines.reduce((acc, curr) => acc + curr.price, 0).toLocaleString()}
+              </span>
+            )}
+          </div>
 
-          <div className="space-y-2 text-xs">
-            <div className="flex justify-between py-2 border-b border-white/5">
-              <span className="text-zinc-400 font-bold">Disciplina Activa</span>
-              <span className="font-extrabold text-white">{profile.discipline}</span>
+          {assignedDisciplines.length > 0 ? (
+            <div className="space-y-2.5 pt-1">
+              {assignedDisciplines.map((disc) => (
+                <div
+                  key={disc.id}
+                  className="rounded-2xl bg-[#18181C] p-3.5 border border-white/5 flex items-center justify-between text-xs"
+                >
+                  <div className="space-y-0.5">
+                    <span className="font-black text-white block uppercase">{disc.name}</span>
+                    <span className="text-[11px] text-zinc-400 block">
+                      Vence: <strong className="text-[var(--gym-primary)] font-mono">{disc.expiration}</strong>
+                    </span>
+                  </div>
+
+                  <div className="text-right">
+                    <span className="font-extrabold text-white text-xs block">
+                      ${disc.price.toLocaleString()}
+                    </span>
+                    <span className="text-[9px] font-bold uppercase text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20 inline-block mt-0.5">
+                      {disc.status === 'ACTIVE' ? 'Activa' : disc.status}
+                    </span>
+                  </div>
+                </div>
+              ))}
             </div>
-            <div className="flex justify-between py-2 border-b border-white/5">
-              <span className="text-zinc-400 font-bold">Profesor Asignado</span>
-              <span className="font-extrabold text-white">{profile.trainer}</span>
-            </div>
-            <div className="flex justify-between py-2">
-              <span className="text-zinc-400 font-bold">Próximo Vencimiento</span>
-              <span className="font-mono font-bold text-[var(--gym-primary)]">{profile.nextExpiration}</span>
-            </div>
+          ) : (
+            <p className="text-xs text-zinc-500 italic py-2">Sin disciplinas asignadas activas.</p>
+          )}
+
+          <div className="pt-2 border-t border-white/5 flex justify-between text-xs">
+            <span className="text-zinc-400 font-bold">Profesor de Sala</span>
+            <span className="font-extrabold text-white">{profile.trainer}</span>
           </div>
         </div>
       </main>

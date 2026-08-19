@@ -19,32 +19,89 @@ export default function StudentDashboardPage() {
         const supabase = createClient();
         const { data: { user } } = await supabase.auth.getUser();
 
+        let studentId = user?.id;
+        let studentRecord: any = null;
+
         if (user) {
-          // Fetch student profile
-          const { data: profile } = await supabase
-            .from('profiles')
+          // Check students table by email first
+          const { data: std } = await supabase
+            .from('students')
             .select('*')
-            .eq('id', user.id)
-            .single();
+            .eq('email', user.email)
+            .maybeSingle();
 
-          if (profile) {
-            setUserProfile(profile);
-
-            // Fetch active routine for student
-            const { data: routine } = await supabase
-              .from('routines')
-              .select('*, routine_days(*, routine_exercises(*))')
-              .eq('student_id', user.id)
-              .eq('is_active', true)
-              .single();
-
-            if (routine) {
-              setActiveRoutine(routine);
+          if (std) {
+            studentRecord = std;
+            studentId = std.id;
+            setUserProfile({
+              id: std.id,
+              gym_id: std.gym_id,
+              first_name: std.first_name,
+              last_name: std.last_name,
+              email: std.email,
+              phone: std.phone || '',
+              role: 'STUDENT',
+              avatar_url: null,
+              is_active: true,
+              created_at: std.created_at,
+              updated_at: std.updated_at,
+            });
+          } else {
+            // Check profiles
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', user.id)
+              .maybeSingle();
+            if (profile) {
+              setUserProfile(profile);
             }
           }
         }
+
+        // Fallback: If no user session, fetch the most recent active student
+        if (!studentRecord && !userProfile) {
+          const { data: latestStudents } = await supabase
+            .from('students')
+            .select('*')
+            .eq('status', 'ACTIVE')
+            .order('created_at', { ascending: false })
+            .limit(1);
+
+          if (latestStudents && latestStudents.length > 0) {
+            const std = latestStudents[0];
+            studentId = std.id;
+            setUserProfile({
+              id: std.id,
+              gym_id: std.gym_id,
+              first_name: std.first_name,
+              last_name: std.last_name,
+              email: std.email,
+              phone: std.phone || '',
+              role: 'STUDENT',
+              avatar_url: null,
+              is_active: true,
+              created_at: std.created_at,
+              updated_at: std.updated_at,
+            });
+          }
+        }
+
+        if (studentId) {
+          // Fetch active routine for student
+          const { data: routine } = await supabase
+            .from('routines')
+            .select('*, routine_days(*, routine_exercises(*))')
+            .eq('student_id', studentId)
+            .eq('is_active', true)
+            .maybeSingle();
+
+          if (routine) {
+            setActiveRoutine(routine);
+          }
+        }
       } catch (err) {
-        console.log('Cargando portal alumno...');
+        console.log('Error loading student portal data:', err);
       } finally {
         setIsLoading(false);
       }

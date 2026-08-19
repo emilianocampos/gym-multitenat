@@ -10,10 +10,10 @@ export default function AdminExercisesPage() {
   const [searchTerm, setSearchTerm] = useState('');
 
   return (
-    <div className="min-h-screen bg-[#0B0B0E] text-white flex">
+    <div className="min-h-screen bg-[#0B0B0E] text-white flex flex-col md:flex-row">
       <AdminSidebar />
 
-      <main className="flex-1 md:ml-64 p-6 lg:p-10 space-y-8">
+      <main className="w-full min-w-0 flex-1 md:ml-64 p-4 sm:p-6 lg:p-10 space-y-6 sm:space-y-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-zinc-800 pb-6">
           <div>
             <span className="text-xs font-extrabold uppercase tracking-widest text-[var(--gym-primary)]">Biblioteca de Ejercicios</span>
